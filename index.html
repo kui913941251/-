@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>贪吃蛇</title>
+  <link rel="stylesheet" href="./css/main.css">
+</head>
+<body>
+
+  <div id="container">
+    
+    <ul id="chess_board">
+    </ul>
+    
+    <div id="snake">
+      <div class="snake_head"></div>
+    </div>
+
+
+    <button class="start_game">开始游戏</button>
+    <div class="score">得分:0</div>
+  </div>
+</body>
+
+<script>
+
+  window.addEventListener("load" , function() {
+
+    let ul = document.querySelector("#chess_board"),
+        lis,
+        startBtn = document.querySelector(".start_game"),
+        snakeData = {
+          speed: 200,
+          keyCode: 39
+        },
+        snakeHead = document.querySelector(".snake_head"),
+        timer,
+        snake = document.querySelector("#snake"),
+        scoreGrade = 0,
+        score = document.querySelector(".score")
+        snakeHead.index = 0,
+        flag = false
+
+    init() // 初始化
+    function init() {
+      creatChessBoard()
+      creatFood()
+    }
+
+    // 撞到四周
+    function isOut() {
+      for(let i = 0 ; i < lis.length ; i++) {
+        if (collision(snakeHead , lis[i])) {
+          return false
+        }
+      }
+      return true
+    }
+    // 撞到自身
+    function isSelf() {
+      let bodys = snake.querySelectorAll("div")
+      for(let i = 1 ; i < bodys.length ; i++) {
+        if (collision(snakeHead , bodys[i])) {
+          return true
+        }
+      }
+      return false
+    }
+
+    function startGame() {
+      flag = true
+      timer = setInterval(fun,snakeData.speed)
+    }
+    // 创建一个循环函数
+    function fun() {
+      if (scoreGrade >= 100) {
+        snakeData.speed = 50
+        clearInterval(timer)
+        timer = setInterval(fun , snakeData.speed)
+      }else if(scoreGrade >= 50){
+        snakeData.speed = 100
+        clearInterval(timer)
+        timer = setInterval(fun , snakeData.speed)
+      } 
+      
+      if(isOut() || isSelf()) {
+        clearInterval(timer)
+        setTimeout(function() {
+          alert("游戏结束")
+          flag = false
+          location.reload()
+        })
+      }
+
+      let food = document.querySelector(".food")
+      if(collision(snakeHead , food)) {
+        snake.appendChild(food)
+        food.className = "snake_body"
+        scoreGrade += 10
+        score.innerHTML = "得分:" + scoreGrade
+        creatFood()
+      }else {
+        food.style.backgroundColor = "#f39c12"
+      }
+
+      let bodys = snake.querySelectorAll("div")
+      for(let i = bodys.length - 1 ; i > 0 ; i--) {
+        bodys[i].style.left = bodys[i - 1].offsetLeft + "px"
+        bodys[i].style.top = bodys[i -1].offsetTop + "px"
+        bodys[i].index = bodys[i - 1].index
+      }
+
+      switch(snakeData.keyCode) {
+        case 37: // 左
+          snakeHead.style.left = snakeHead.offsetLeft - 20 + "px"
+          snakeHead.index -= 1
+          break
+        case 38: // 上
+          snakeHead.style.top = snakeHead.offsetTop - 20 + "px"
+          snakeHead.index -= 20
+          break
+        case 39: // 右
+          snakeHead.style.left = snakeHead.offsetLeft + 20 + "px"
+          snakeHead.index += 1
+          break
+        case 40: // 下 
+          snakeHead.style.top = snakeHead.offsetTop + 20 + "px"
+          snakeHead.index += 20
+          break
+      }
+    }
+
+
+
+    // 点击开始游戏
+    startBtn.addEventListener("click" , function() {
+      if(flag) return
+      startGame()
+    })
+
+    function creatChessBoard() {
+      // 初始化棋盘
+      for (let i = 0 ; i < 400 ; i++) {
+        let li = document.createElement("li")
+        li.index = i
+        ul.appendChild(li)
+      }
+      lis = document.querySelectorAll("li")
+    }
+
+    // 改变方向
+    document.addEventListener("keydown" , function(e) {
+      e = window.event || e
+      switch (e.keyCode) {
+        case 37: 
+          if(snakeData.keyCode == 39) return
+          snakeData.keyCode = 37
+          break
+        case 38: 
+          if(snakeData.keyCode == 40) return
+          snakeData.keyCode = 38
+          break
+        case 39: 
+          if(snakeData.keyCode == 37) return
+          snakeData.keyCode = 39
+          break
+        case 40: 
+          if(snakeData.keyCode == 38) return
+          snakeData.keyCode = 40
+          break
+      }
+    })
+
+    // 创建食物
+    function creatFood() {
+      // 排除蛇自身所占的位置
+      let list = []
+      let snakeItem = snake.querySelectorAll("div")
+			addIndex()
+      function addIndex() {
+        for(let i = 0 ; i < lis.length ; i++) {
+          if (filterIndex(lis[i])) {
+            list.push(lis[i])
+          }
+        }
+      }
+      function filterIndex(li) {
+        for(let i = 0 ; i < snakeItem.length ; i++) {
+          if (snakeItem[i].index === li.index) {
+            return false
+          }
+        }
+        return true
+      }
+      let random = Math.floor(Math.random() * list.length + 1)
+      let food = document.createElement("div")
+      food.className = "food"
+      food.style.left = list[random].offsetLeft + "px"
+      food.style.top = list[random].offsetTop + "px"
+      document.querySelector("#container").appendChild(food)
+    }
+
+
+    // 碰撞检测
+    function collision(el1 , el2) {
+      let l1 = el1.offsetLeft,
+          r1 = el1.offsetLeft + 20,
+          t1 = el1.offsetTop,
+          b1 = el1.offsetTop + 10
+
+      let l2 = el2.offsetLeft,
+          r2 = el2.offsetLeft + 20,
+          t2 = el2.offsetTop,
+          b2 = el2.offsetTop + 20
+      if (r1 <= l2 || l1 >= r2 || b1 <= t2 || t1 >= b2) {
+        return false
+      }else {
+        return true
+      }
+    }
+
+  })
+
+</script>
+
+</html>

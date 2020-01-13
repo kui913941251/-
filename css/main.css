@@ -1,0 +1,58 @@
+
+    *{
+      margin: 0;
+      padding: 0;
+    }
+    
+    li {
+      list-style: none;
+    }
+
+    #container{
+      position: relative;
+      width: 400px;
+      margin: 0 auto;
+    }
+
+    #chess_board{
+      width: 400px;
+      height: 400px;
+      border: 1px solid #000;
+    }
+
+    #chess_board > li {
+      width: 20px;
+      height: 20px;
+      float: left;
+      background-color: #eee;
+    }
+
+    .score{
+      float: right;
+    }
+
+    #snake div {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: deepskyblue;
+    }
+
+    .snake_head{
+      left: 1px;
+      top: 1px;
+      border-radius: 5px;
+    }
+
+    .snake_body{
+      border-radius: 50%;
+    }
+
+    .food{
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #f39c12;
+      border-radius: 50%;
+      transition: .3s;
+    }
